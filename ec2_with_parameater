@@ -1,0 +1,25 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Creating an EC2 Instance
+Parameters:
+  MyKeyName:
+    Description: Listing all the keys
+    Type: AWS::EC2::KeyPair::KeyName
+  MyEC2InstanceList:
+    Description: Listing all the instance types 
+    Type: String 
+    Default: t2.micro 
+    AllowedValues:
+      - t2.micro
+      - m1.small
+      - m1.large
+Resources:
+  MyEC2Instance: 
+      Type: AWS::EC2::Instance
+      Properties: 
+        ImageId: "ami-0568773882d492fc8"
+        KeyName: !Ref MyKeyName
+        AvailabilityZone: "us-east-2a"
+        InstanceType: !Ref MyEC2InstanceList
+        Tags:
+          - Key: "Name"
+            Value: "web"
