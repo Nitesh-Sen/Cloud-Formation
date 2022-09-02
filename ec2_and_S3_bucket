@@ -1,0 +1,128 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description:
+  Demo CF
+
+Parameters:
+  bucketname:
+    Description: bucketname
+    Type: String
+    Default: nitu 
+  Env:
+    Description: Env
+    Type: String 
+    AllowedValues:
+      - dev 
+      - stage 
+      - prod 
+    Default: dev
+
+  Env1:
+    Description: Env
+    Type: String 
+    AllowedValues:
+      - dev 
+      - stage 
+      - prod 
+    Default: stage
+  
+  Env2:
+    Description: Env
+    Type: String 
+    AllowedValues:
+      - dev 
+      - stage 
+      - prod 
+    Default: prod
+
+  instancesize:
+    Type: String
+    Default: t2.micro
+    AllowedValues: 
+      - t2.micro
+      - t2.small
+      - t2.medium
+
+
+
+Mappings:
+  AMIs: 
+    us-east-1:
+      Name: ami-05fa00d4c63e32376
+      Name1: ami-06640050dc3f556bb
+      Name2: ami-052efd3df9dad4825
+    us-west-1:
+      Name: ami-05fa00d4c63e32376
+      Name1: ami-06640050dc3f556bb
+      Name2: ami-052efd3df9dad4825
+    us-east-2:
+      Name: ami-05fa00d4c63e32376
+      Name1: ami-06640050dc3f556bb
+      Name2: ami-052efd3df9dad4825
+Conditions:
+  isProd: !Equals [!Ref Env, Prod]
+
+Resources:
+
+  s3Bucket:
+    Type: AWS::S3::Bucket
+    Condition: isProd
+
+  s3Bucket1:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${bucketname}-niteshsen-${AWS::Region}-${Env}
+      Tags:
+        - Key: Key
+          Value: !If [isProd, PROD-tag, !Ref Env]
+
+  s3Bucket2:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${bucketname}-niteshsen-${AWS::Region}-${Env1}
+      Tags:
+        - Key: Key
+          Value: value 
+        - Key: Env 
+          Value: value 
+
+  s3Bucket2:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${bucketname}-niteshsen-${AWS::Region}-${Env2}
+      Tags:
+        - Key: Key
+          Value: value 
+        - Key: Env 
+          Value: value
+
+          
+  myEc2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !FindInMap [AMIs, us-east-1, Name]
+      InstanceType: 
+          Ref: instancesize
+      Tags:
+        - Key: "Name"
+          Value: !Sub ${bucketname}-niteshsen-${AWS::Region}-${Env} 
+
+  myEc2Instance1:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !FindInMap [AMIs, us-west-1, Name1]
+      InstanceType: 
+          Ref: instancesize
+      Tags:
+        - Key: "Name"
+          Value: !Sub ${bucketname}-niteshsen1-${AWS::Region}-${Env1}
+
+  myEc2Instance2:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !FindInMap [AMIs, us-east-2, Name2]
+      InstanceType: 
+          Ref: instancesize
+      Tags:
+        - Key: "Name"
+          Value: !Sub ${bucketname}-niteshsen2-${AWS::Region}-${Env2}
