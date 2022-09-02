@@ -12,28 +12,28 @@ Parameters:
     Description: Env
     Type: String 
     AllowedValues:
-      - dev 
-      - stage 
-      - prod 
-    Default: dev
+      - devi 
+      - stagei 
+      - prodi
+    Default: devi
 
   Env1:
     Description: Env
     Type: String 
     AllowedValues:
-      - dev 
-      - stage 
-      - prod 
-    Default: stage
+      - devi 
+      - stagei 
+      - prodi
+    Default: stagei
   
   Env2:
     Description: Env
     Type: String 
     AllowedValues:
-      - dev 
-      - stage 
-      - prod 
-    Default: prod
+      - devi 
+      - stagei 
+      - prodi
+    Default: prodi
 
   instancesize:
     Type: String
@@ -68,7 +68,7 @@ Resources:
     Type: AWS::S3::Bucket
     Condition: isProd
 
-  s3Bucket1:
+  s3Bucket:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Sub ${bucketname}-niteshsen-${AWS::Region}-${Env}
@@ -76,7 +76,7 @@ Resources:
         - Key: Key
           Value: !If [isProd, PROD-tag, !Ref Env]
 
-  s3Bucket2:
+  s3Bucket1:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Sub ${bucketname}-niteshsen-${AWS::Region}-${Env1}
