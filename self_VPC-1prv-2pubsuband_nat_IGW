@@ -1,0 +1,100 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "create the VPC"
+Resources:
+
+  #VPC
+  MYVPC: 
+    Type: "AWS::EC2::VPC"
+    Properties:
+      CidrBlock: "10.0.0.0/16"
+  #SUBNET
+  PUBsubnet: 
+    Type: "AWS::EC2::Subnet"
+    Properties: 
+      VpcId: !Ref MYVPC
+      AvailabilityZone: us-east-1a
+      CidrBlock: 10.0.1.0/24
+      MapPublicIpOnLaunch: "true"
+  PRISubnet01:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      VpcId: !Ref MYVPC
+      AvailabilityZone: us-east-1a
+      CidrBlock: 10.0.2.0/24
+      MapPublicIpOnLaunch: "false"
+  PRISubnet02:
+    Type: "AWS::EC2::Subnet"
+    Properties:
+      VpcId: !Ref MYVPC
+      AvailabilityZone: us-east-1a
+      CidrBlock: 10.0.3.0/24
+      MapPublicIpOnLaunch: "false"
+  
+  #Internet Gateway
+  PUBigw:
+    Type: "AWS::EC2::InternetGateway"
+  GTInternet:
+    Type: "AWS::EC2::VPCGatewayAttachment"
+    Properties: 
+      VpcId: !Ref MYVPC
+      InternetGatewayId: !Ref PUBigw
+
+  #Public Routing
+  PUBrt:
+    Type: "AWS::EC2::RouteTable"
+    Properties:
+      VpcId: !Ref MYVPC
+
+  Publicrt:
+    Type: "AWS::EC2::Route"
+    DependsOn: GTInternet
+    Properties: 
+      RouteTableId: !Ref PUBrt
+      DestinationCidrBlock: "0.0.0.0/0"
+      GatewayId: !Ref PUBigw
+  
+  PUBsubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties: 
+      SubnetId: !Ref PUBsubnet
+      RouteTableId: !Ref PUBrt
+
+  # NAT GATEWAY
+  NatGTW:
+    Type: AWS::EC2::NatGateway
+    DependsOn: NATGatewayEIP
+    Properties: 
+      SubnetId: !Ref PUBsubnet
+      AllocationId: !GetAtt NATGatewayEIP.AllocationId
+  
+  ## ELASTIC IP
+  NATGatewayEIP:
+    Type: AWS::EC2::EIP
+    DependsOn: MYVPC
+    Properties:
+      Domain: vpc 
+
+  ## PRIVATE ROUTING
+  PrivateRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref MYVPC
+  
+  PrivateRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      NatGatewayId: !Ref NatGTW
+      RouteTableId: !Ref PrivateRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+ 
+  PrivateSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PRISubnet01
+      RouteTableId: !Ref PrivateRouteTable
+ 
+  PrivateSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PRISubnet02
+      RouteTableId: !Ref PrivateRouteTable
