@@ -239,7 +239,7 @@ Resources:
           yum install httpd -y
           service httpd enable || systemctl enable httpd
           sudo service httpd start || sudo systemctl start httpd
-          echo "<h1><font size = "10"color='red">amit sir zindhabad the</font><br /></h1><h2> <font size = "10"color="pink">amit sir zindhabad hai</font><br /></h2><h3> <font size = "10"color="orenge">amit sir zindhabad rhenge</font><br /></h3>" >> /var/www/html/index.html
+          yum install git -y && cd /home/ec2-user/  && sudo git clone https://github.com/Nitesh-Sen/Just_for_fun.git && mv /home/ec2-user/Just_for_fun/index.html /var/www/html/
           systemctl restart httpd || service httpd restart
         Tags:
           - Key: "Name"
