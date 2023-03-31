@@ -1,0 +1,104 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+
+
+
+
+#############-----------   Parameaters   ------------------###############
+
+Parameters:
+    ###### Instance Type
+  InstanceType:
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.micro
+    Description: Allowed t2.micro only
+    ######  Key Pair
+  mykey:
+    Type: AWS::EC2::KeyPair::KeyName
+    ######  Image ID's
+  AMIid:
+    Type: String
+    Default: ami-02f97949d306b597a
+    AllowedValues:
+      - "ami-02f97949d306b597a"
+      - "ami-0a695f0d95cefc163"
+    ######   Subnet ID's
+  mySubnetIDs: 
+    Description: Subnet IDs
+    Type: "List<AWS::EC2::Subnet::Id>"
+  BucketN:
+    Type: String
+    Default: my-unique-bucket-name-1111
+    ######   Envirnment Variable
+  Env:
+    Type: String
+    Default: Dev  
+    AllowedValues:
+      - Dev
+      - Prod 
+  # --- Conditions
+Conditions:
+  CheckEnv:
+    !Equals 
+      - !Ref Env 
+      - Prod
+
+
+
+
+
+##############---------------- Resourses  -----------------#################
+
+Resources:
+##### Create EC2 instance
+  MyEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref AMIid
+      InstanceType: !Ref InstanceType
+      KeyName: !Ref mykey
+      SubnetId: !Select [ 0, !Ref mySubnetIDs ]
+      Tags:
+        - Key: Client
+          Value: Nitesh
+        - Key: Env
+          Value: 
+            !If 
+              - CheckEnv
+              - Prod
+              - Dev
+###### S3 bucket
+  S3bucket:
+    Type: AWS::S3::Bucket
+    Condition: CheckEnv 
+    Properties: 
+      BucketName: !Ref BucketN
+      Tags  :
+        - Key: s3
+          Value: !Ref BucketN
+
+
+
+
+
+
+##############-----------------    Outputs   ----------------###############
+
+Outputs:
+  InstanceID:
+    Description: This is your instanceID
+    Value: !Ref MyEC2Instance
+
+  PublicDNSId:
+    Description: This is your Instance's Public DNS id.
+    Value: !GetAtt MyEC2Instance.PublicDnsName
+
+  PrivateDNId:
+    Description: This is your Instance's Private DNS id.
+    Value: !GetAtt MyEC2Instance.PrivateDnsName
+
+  Bucketname:
+    Description: This is your Bucket Name
+    Value: !Ref BucketN
